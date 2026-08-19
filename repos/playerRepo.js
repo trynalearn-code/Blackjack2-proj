@@ -12,3 +12,10 @@ export async function findPlayerByIdRepo(id) {
         _id:new ObjectId(id)
     })
 }
+
+export async function updatePlayerChips(playerId, chips) {
+    return await players.updateOne(
+        {_id:playerId},
+        {$set:{chips:chips}}
+    )
+}
