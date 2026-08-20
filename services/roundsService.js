@@ -1,4 +1,4 @@
-import { createRoundRepo, checkIfRoundInProgressRepo } from "../repos/roundsRepo.js";
+import { createRoundRepo, checkIfRoundInProgressRepo, updateRoundCards, updateRoundStatus } from "../repos/roundsRepo.js";
 import { updatePlayerChips } from "../repos/playerRepo.js";
 import { drawCard, determineValue } from "../utils/cards.js";
 
@@ -29,5 +29,38 @@ export async function createRoundService(player, bet) {
         playerCards:playerCards,
         dealerCard:dealerCards[0],
         chips:newChips
+    }
+}
+
+export async function hitService(playerId) {
+    const round = await checkIfRoundInProgressRepo(playerId)
+    if (!round){
+        throw new Error("Player has no active round")
+    }
+    const newCard = drawCard()
+    round.playerCards.push(newCard)
+    const playerScore = determineValue(round.playerCards)
+    await updateRoundCards(round._id, round.playerCards)
+    if(playerScore >21){
+        await updateRoundStatus(round._id, "bust")
+
+        return {
+            playerCards:round.playerCards,
+            playerScore:playerScore,
+            status:"bust"
+        }
+    }
+    return {
+            playerCards:round.playerCards,
+            playerScore:playerScore,
+            status:"in_progress"
+        }
+    if(playerScore===21){
+        await updateRoundStatus(round_id, "player_21")
+        return {
+            playerCards:round.playerCards,
+            playerScore:playerScore,
+            status:"player_21"
+        }
     }
 }

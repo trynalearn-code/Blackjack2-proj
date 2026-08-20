@@ -13,3 +13,11 @@ export async function checkIfRoundInProgressRepo(playerId) {
         status:"in_progress"
     })
 }
+
+export async function updateRoundCards(roundId, playerCards){
+    return await rounds.updateOne({_id:roundId}, {$set:{playerCards:playerCards}})
+}
+
+export async function updateRoundStatus(roundId, status){
+    return await rounds.updateOne({_id:roundId}, {$set:{status:status}})
+}
