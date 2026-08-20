@@ -1,5 +1,5 @@
-import { createRoundRepo, checkIfRoundInProgressRepo, updateRoundCards, updateRoundStatus } from "../repos/roundsRepo.js";
-import { updatePlayerChips } from "../repos/playerRepo.js";
+import { createRoundRepo, checkIfRoundInProgressRepo, updateRoundCards, updateRoundStatus, updateDealerCards, findActiveRound } from "../repos/roundsRepo.js";
+import { updatePlayerChips, findPlayerByIdRepo } from "../repos/playerRepo.js";
 import { drawCard, determineValue } from "../utils/cards.js";
 
 export async function createRoundService(player, bet) {
@@ -56,11 +56,68 @@ export async function hitService(playerId) {
             status:"in_progress"
         }
     if(playerScore===21){
+        const player = await findPlayerByIdRepo(playerId);
+        const newChips = player.chips + round.bet * 2;
+        await updatePlayerChips(player._id, newChips);
         await updateRoundStatus(round_id, "player_21")
         return {
             playerCards:round.playerCards,
             playerScore:playerScore,
-            status:"player_21"
+            status:"player_21",
+            chips:newChips
         }
     }
+}
+
+export async function standService(playerId) {
+    const round = await findActiveRound(playerId);
+    console.log("playerId:", playerId);
+
+console.log("found round:", round);
+    if (!round) {
+        throw new Error("Player has no active round");
+    }
+
+    const player = await findPlayerByIdRepo(playerId);
+
+    let dealerCards = round.dealerCards
+    let dealerScore = determineValue(dealerCards)
+
+    while (dealerScore < 17) {
+        dealerCards.push(drawCard())
+        dealerScore = determineValue(dealerCards)
+    }
+
+    const playerScore = determineValue(round.playerCards)
+
+    await updateDealerCards(round._id, dealerCards)
+
+    let status;
+    let newChips = player.chips;
+
+    if (dealerScore > 21) {
+        status = "win"
+        newChips += round.bet * 2;
+    } else if (playerScore > dealerScore) {
+        status = "win"
+        newChips += round.bet * 2;
+    } else if (playerScore < dealerScore) {
+        status = "loss"
+    } else {
+        status = "push"
+        newChips += round.bet
+    }
+
+    await updatePlayerChips(player._id, newChips);
+    await updateRoundStatus(round._id, status);
+
+    return {
+        playerCards: round.playerCards,
+        playerScore,
+        dealerCards,
+        dealerScore,
+        status,
+        chips: newChips
+    }
+
 }

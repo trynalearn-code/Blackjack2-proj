@@ -21,3 +21,19 @@ export async function updateRoundCards(roundId, playerCards){
 export async function updateRoundStatus(roundId, status){
     return await rounds.updateOne({_id:roundId}, {$set:{status:status}})
 }
+
+export async function updateDealerCards(roundId, dealerCards) {
+    return await rounds.updateOne(
+        { _id: roundId },
+        { $set: { dealerCards: dealerCards } }
+    );
+}
+
+export async function findActiveRound(playerId) {
+        return await rounds.findOne({
+        playerId: playerId,
+        status: {
+            $in: ["in_progress", "player_21"]
+        }
+    });
+}

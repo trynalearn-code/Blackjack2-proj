@@ -1,7 +1,7 @@
 import { createPlayerController } from "../controller/playerController.js";
 import { Router } from "express";
 import { checkIdExists } from "../middleware/playermiddleware.js";
-import { createRoundController, hitController } from "../controller/roundsController.js";
+import { createRoundController, hitController, standController } from "../controller/roundsController.js";
 
 const router = Router()
 
@@ -13,5 +13,6 @@ router.post("/start-round", checkIdExists, createRoundController)
 
 router.post("/hit", checkIdExists, hitController);
 
+router.post("/stand", checkIdExists, standController);
 
 export default router
