@@ -8,5 +8,4 @@ await client.connect();
 const db = client.db("blackjack")
 
 console.log("Successfully connected to MongoDB!");
-
 export default db

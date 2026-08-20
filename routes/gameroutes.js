@@ -5,6 +5,8 @@ import { createRoundController } from "../controller/roundsController.js";
 
 const router = Router()
 
+// console.log(createPlayerController())
+
 router.post("/start-game", createPlayerController)
 
 router.post("/start-round", checkIdExists, createRoundController)

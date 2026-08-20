@@ -10,7 +10,7 @@ export async function createRoundService(player, bet) {
     if(bet>player.chips) throw new Error("You don't have enough chips")
     
     const newChips = player.chips-bet
-    await updatePlayerChips(player._id, newChips)
+    await updatePlayerChips(player._id, newChips);
 
     const playerCards = [drawCard(), drawCard()]
     const dealerCards = [drawCard(), drawCard()]
